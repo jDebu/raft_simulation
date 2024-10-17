@@ -13,10 +13,13 @@ RSpec.describe Node do
     @node2.add_neighbor(@node3)
     @node3.add_neighbor(@node1)
     @node3.add_neighbor(@node2)
+  
+    @node1.become_leader
   end
 
   it 'proposes a state' do
     @node1.propose_state(1)
+    @node2.propose_state(2)
     puts @node1.retrieve_log
     puts @node2.retrieve_log
     puts @node3.retrieve_log
