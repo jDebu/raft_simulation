@@ -14,7 +14,10 @@ RSpec.describe Node do
     @node3.add_neighbor(@node1)
     @node3.add_neighbor(@node2)
   
-    @node1.become_leader
+  end
+
+  it 'start election' do
+    @node1.start_election
   end
 
   it 'proposes a state' do
