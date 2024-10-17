@@ -1,4 +1,4 @@
-# raft_simulation 
+# Raft Simulation 
 
 1. Clone this project
  ```bash
@@ -13,5 +13,5 @@
 
 3. Run tests
  ```bash
-   rspec spec/node_spec.rb
+   rspec spec/node_spec.rb --format doc
  ```
