@@ -94,4 +94,25 @@ RSpec.describe Node do
     puts @node2.retrieve_log
     puts @node3.retrieve_log
   end
+
+  it 'simulates recovery from partition and ensures single leader' do
+    @node1.start_election
+    expect(@node1.raft_state).to eq(:leader)
+    expect(@node1.retrieve_log).to include("Node 1 became leader in term 1")
+    
+    @node1.simulate_partition([@node2, @node3])  
+    @node2.start_election
+    expect(@node2.raft_state).to eq(:leader)
+    expect(@node2.retrieve_log).to include("Node 2 became leader in term 2")
+
+    @node1.recover_partition
+    
+    expect(@node1.raft_state).to eq(:follower)
+    expect(@node1.term).to eq(2)
+    expect(@node2.raft_state).to eq(:leader)
+    
+    puts @node1.retrieve_log
+    puts @node2.retrieve_log
+    puts @node3.retrieve_log
+  end
 end

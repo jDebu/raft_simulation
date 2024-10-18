@@ -8,7 +8,7 @@
 
  2. Install dependencies
  ```bash
-   bunlde install
+   bundle install
  ```
 
 3. Run tests

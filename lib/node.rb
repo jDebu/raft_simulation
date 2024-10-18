@@ -1,4 +1,3 @@
-require 'debug'
 class Node
   attr_accessor :id, :neighbors, :log, :accepted_states, :proposed_state, :leader, :votes, :term, :voted_for, :partitioned_nodes, :raft_state
 
@@ -148,6 +147,29 @@ class Node
     partitioned_nodes.each do |node|
       node.partitioned_nodes << self unless node.partitioned_nodes.include?(self)
       node.log << "Node #{node.id} is partitioned from #{@id}"
+    end
+  end
+
+  def become_follower(new_term)
+    @raft_state = :follower
+    @term = new_term
+    @leader = false
+    @voted_for = nil
+    log << "Node #{@id} became follower in term #{@term}"
+  end
+
+  def recover_partition
+    @partitioned_nodes.clear
+    neighbors.each do |neighbor|
+      neighbor.partitioned_nodes.delete(self)
+    end
+    log << "Node #{@id} recovered from partition"
+    other_leaders = neighbors.select { |neighbor| neighbor.raft_state == :leader && neighbor.term > @term }
+    if other_leaders.any?
+      log << "Node #{@id} detected other leaders with higher terms: #{other_leaders.map(&:id).join(', ')}"
+      become_follower(other_leaders.first.term)
+    else
+      log << "Node #{@id} found no higher-term leaders"
     end
   end
 
