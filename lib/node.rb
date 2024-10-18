@@ -1,3 +1,4 @@
+require 'debug'
 class Node
   attr_accessor :id, :neighbors, :log, :accepted_states, :proposed_state, :leader, :votes, :term, :voted_for, :partitioned_nodes
 
@@ -137,6 +138,10 @@ class Node
   def simulate_partition(partitioned_nodes)
     @partitioned_nodes = partitioned_nodes
     log << "Node #{@id} is partitioned from #{partitioned_nodes.map(&:id).join(', ')}"
+    partitioned_nodes.each do |node|
+      node.partitioned_nodes << self unless node.partitioned_nodes.include?(self)
+      node.log << "Node #{node.id} is partitioned from #{@id}"
+    end
   end
 
   def retrieve_log
