@@ -1,14 +1,14 @@
 # Raft Simulation 
 
-## Descripción
+## Description
 This project is a simulation of the RAFT algorithm
 
-## Requisitos Previos
+## Previous Requirements
 
 - Ruby 3.2 or higher
 - Bundler
 
-## Instalación
+## Installation
 
 1. Clone this project
  ```bash
@@ -26,7 +26,7 @@ This project is a simulation of the RAFT algorithm
    rspec spec/node_spec.rb --format doc
  ```
 
-## Recursos Adicionales
+## Aditionals Resources
 
-- [Documentación de RAFT](https://raft.github.io/)
-- [Artículo sobre algoritmos de consenso](https://medium.com/@dappsar/algor%C3%ADtmos-de-consenso-raft-y-paxos-b252e51e911a)
+- [RAFT Documentation](https://raft.github.io/)
+- [Article on consensus algorithms](https://medium.com/@dappsar/algor%C3%ADtmos-de-consenso-raft-y-paxos-b252e51e911a)
