@@ -1,6 +1,6 @@
 require 'debug'
 class Node
-  attr_accessor :id, :neighbors, :log, :accepted_states, :proposed_state, :leader, :votes, :term, :voted_for, :partitioned_nodes
+  attr_accessor :id, :neighbors, :log, :accepted_states, :proposed_state, :leader, :votes, :term, :voted_for, :partitioned_nodes, :raft_state
 
   def initialize(id)
     @id = id
@@ -13,6 +13,7 @@ class Node
     @term = 0
     @voted_for = nil
     @partitioned_nodes = []
+    @raft_state = :follower
   end
 
   def add_neighbor(node)
@@ -21,22 +22,24 @@ class Node
 
   def become_leader
     @leader = true
+    @raft_state = :leader
     log << "Node #{@id} became leader in term #{@term}"
   end
 
   def start_election
-    if @leader
+    if @raft_state == :leader
       log << "Node #{@id} is already a leader in term #{@term}, no need to start a new election."
       return
     end
-
+    
     neighbors.each do |neighbor|
-      if neighbor.leader
+      if neighbor.raft_state == :leader && !partitioned_nodes.include?(neighbor)
         log << "Node #{@id} canceled its election for term #{@term} because Node #{neighbor.id} is already the leader."
         return
       end
-    end
+    end 
 
+    @raft_state = :candidate
     @term += 1
     @voted_for = self
     @votes = 1
@@ -55,7 +58,7 @@ class Node
   end
 
   def receive_vote_request(candidate, candidate_term)
-    if (candidate_term > @term || candidate_term == @term) && @voted_for.nil?
+    if candidate_term > @term || (candidate_term == @term && @voted_for.nil?)
       @term = candidate_term
       @voted_for = candidate
       log << "Node #{@id} voted for Node #{candidate.id} in term #{candidate_term}"
@@ -81,15 +84,19 @@ class Node
   end
 
 
+  def has_followers?
+    neighbors.any? { |neighbor| !partitioned_nodes.include?(neighbor) }
+  end
+
   def propose_state(state)
-    if @leader
+    if @raft_state == :leader && has_followers?
       @proposed_state = state
       log << "Node #{@id} (leader) proposes state: #{state}"
       @votes = 1
       accepted_states << state
       send_proposal(state)
     else
-      log << "Node #{@id} tried to propose state #{state} but is not the leader"
+      log << "Node #{@id} tried to propose state #{state} but is not the leader or has no followers"
     end
   end
 
